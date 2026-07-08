@@ -16,7 +16,7 @@ Vendor compliance, approval, and performance management app (v1/MVP). Global sta
 - `pnpm build` / `npx tsc --noEmit` — verify
 - `pnpm prisma migrate dev` — apply schema changes
 - `pnpm db:seed` — seed admin/vendor/compliance items
-- DB: local `postgresql@16` (Homebrew). `DATABASE_URL` in `.env`.
+- DB: Supabase Postgres. `DATABASE_URL` (transaction pooler, port 6543) + `DIRECT_URL` (session pooler, port 5432, used by migrations) in `.env`.
 
 ## Seed Credentials
 - Admin: `admin@vendorcity.com` / `Admin123!`
@@ -44,4 +44,6 @@ PENDING / PENDING_REVIEW → amber · APPROVED → green · REJECTED → red · 
 Expiry flags: within 30 days → amber, past → red.
 
 ## v1 Guardrails
-Intentionally minimal. Do NOT add: notifications, email, multi-tenancy, multi-step onboarding wizards, admin-configurable checklists, or permission systems beyond the two roles. Document submission is allowed while onboarding is PENDING.
+Intentionally minimal. Do NOT add: notifications, email, multi-tenancy, admin-configurable checklists, or permission systems beyond the two roles. Document submission is allowed while onboarding is PENDING.
+
+Exception: signup is a client-side animated multi-step wizard (`app/(auth)/register/page.tsx`). It still submits once via the existing `register()` server action with the full `registerSchema` payload — no partial accounts, no new routes, no schema changes. Steps are purely a UI presentation over the same single-page form.
