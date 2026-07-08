@@ -18,7 +18,7 @@ export function PerformanceChart({ data }: { data: { period: string; score: numb
         <XAxis dataKey="period" fontSize={12} tickLine={false} axisLine={false} />
         <YAxis domain={[0, 5]} fontSize={12} tickLine={false} axisLine={false} />
         <Tooltip />
-        <Bar dataKey="score" fill="currentColor" radius={[4, 4, 0, 0]} className="fill-foreground" />
+        <Bar dataKey="score" fill="currentColor" radius={[4, 4, 0, 0]} className="fill-primary" />
       </BarChart>
     </ResponsiveContainer>
   );

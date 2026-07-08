@@ -2,11 +2,16 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { orgPerformanceTrend } from "@/lib/queries";
+import { PerformanceChart } from "@/components/charts/performance-chart";
 
 export default async function PerformanceLeaderboardPage() {
-  const vendors = await db.vendor.findMany({
-    include: { performanceReviews: { orderBy: { createdAt: "desc" } } },
-  });
+  const [vendors, trend] = await Promise.all([
+    db.vendor.findMany({
+      include: { performanceReviews: { orderBy: { createdAt: "desc" } } },
+    }),
+    orgPerformanceTrend(),
+  ]);
 
   const ranked = vendors
     .map((v) => {
@@ -30,6 +35,20 @@ export default async function PerformanceLeaderboardPage() {
         <h1 className="text-2xl font-semibold tracking-tight">Performance leaderboard</h1>
         <p className="text-sm text-muted-foreground">Vendors ranked by average overall score.</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Org-wide average score trend</CardTitle>
+          <CardDescription>Average overall score across all vendors, by review period.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {trend.length === 0 ? (
+            <p className="py-16 text-center text-sm text-muted-foreground">No data yet.</p>
+          ) : (
+            <PerformanceChart data={trend} />
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

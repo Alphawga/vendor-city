@@ -1,9 +1,21 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { onboardingStatusBreakdown, submissionStatusBreakdown } from "@/lib/queries";
+import { OnboardingStatusChart } from "./onboarding-status-chart";
+import { SubmissionStatusChart } from "./submission-status-chart";
 
 export default async function AdminDashboard() {
-  const [totalVendors, pendingOnboarding, pendingDocs, avg, awaitingApproval, awaitingReview] = await Promise.all([
+  const [
+    totalVendors,
+    pendingOnboarding,
+    pendingDocs,
+    avg,
+    awaitingApproval,
+    awaitingReview,
+    onboardingBreakdown,
+    submissionBreakdown,
+  ] = await Promise.all([
     db.vendor.count(),
     db.vendor.count({ where: { onboardingStatus: "PENDING" } }),
     db.complianceSubmission.count({ where: { status: "PENDING_REVIEW" } }),
@@ -24,6 +36,8 @@ export default async function AdminDashboard() {
         complianceItem: { select: { name: true } },
       },
     }),
+    onboardingStatusBreakdown(),
+    submissionStatusBreakdown(),
   ]);
 
   const avgScore = avg._avg.overallScore;
@@ -51,6 +65,28 @@ export default async function AdminDashboard() {
             </CardHeader>
           </Card>
         ))}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Onboarding status</CardTitle>
+            <CardDescription>Breakdown of all vendors by onboarding status.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <OnboardingStatusChart data={onboardingBreakdown} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Compliance submissions</CardTitle>
+            <CardDescription>All submissions across vendors by status.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SubmissionStatusChart data={submissionBreakdown} />
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

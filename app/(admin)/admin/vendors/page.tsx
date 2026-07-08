@@ -4,8 +4,9 @@ import { db } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/lib/status";
-import { completionPct, TOTAL_ITEMS } from "@/lib/queries";
+import { completionPct, complianceCompletionByItem, TOTAL_ITEMS } from "@/lib/queries";
 import { FilterBar } from "./filter-bar";
+import { ComplianceCompletionChart } from "./compliance-completion-chart";
 
 const VALID_STATUSES: OnboardingStatus[] = ["PENDING", "APPROVED", "REJECTED"];
 
@@ -22,14 +23,17 @@ export default async function VendorsPage({
     where.onboardingStatus = status as OnboardingStatus;
   }
 
-  const vendors = await db.vendor.findMany({
-    where,
-    include: {
-      submissions: { where: { status: "APPROVED" }, select: { id: true } },
-      performanceReviews: { orderBy: { createdAt: "desc" }, take: 1 },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const [vendors, completionByItem] = await Promise.all([
+    db.vendor.findMany({
+      where,
+      include: {
+        submissions: { where: { status: "APPROVED" }, select: { id: true } },
+        performanceReviews: { orderBy: { createdAt: "desc" }, take: 1 },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    complianceCompletionByItem(),
+  ]);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -39,6 +43,15 @@ export default async function VendorsPage({
       </div>
 
       <FilterBar />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Compliance completion by item</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ComplianceCompletionChart data={completionByItem} />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

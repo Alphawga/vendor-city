@@ -26,7 +26,13 @@ export function DashboardShell({
     <div className="flex min-h-svh w-full">
       <aside className="hidden w-60 shrink-0 flex-col border-r bg-muted/30 md:flex">
         <div className="border-b px-6 py-4">
-          <p className="text-lg font-bold tracking-tight">Vendor City</p>
+          <div className="flex items-center gap-2">
+            <svg viewBox="0 0 24 24" className="size-5 shrink-0" aria-hidden="true">
+              <rect width="24" height="24" rx="6" className="fill-primary" />
+              <path d="M7 12.5l3 3 7-7" stroke="var(--primary-foreground)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            </svg>
+            <p className="text-lg font-bold tracking-tight">Vendor City</p>
+          </div>
           <p className="text-xs text-muted-foreground">{roleLabel}</p>
         </div>
         <nav className="flex-1 space-y-1 p-3">
@@ -38,7 +44,7 @@ export function DashboardShell({
                 href={item.href}
                 className={cn(
                   "block rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  active ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
                 {item.label}

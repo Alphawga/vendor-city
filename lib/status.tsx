@@ -4,7 +4,7 @@ import type { OnboardingStatus, SubmissionStatus } from "@prisma/client";
 
 type AnyStatus = OnboardingStatus | SubmissionStatus;
 
-const LABELS: Record<AnyStatus, string> = {
+export const LABELS: Record<AnyStatus, string> = {
   PENDING: "Pending",
   APPROVED: "Approved",
   REJECTED: "Rejected",
