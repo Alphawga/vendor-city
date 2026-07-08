@@ -24,7 +24,7 @@ Vendor compliance, approval, and performance management app (v1/MVP). Global sta
 
 ## Data Model
 Enums: `Role` (VENDOR/ADMIN), `OnboardingStatus` (PENDING/APPROVED/REJECTED), `SubmissionStatus` (NOT_SUBMITTED/PENDING_REVIEW/APPROVED/REJECTED).
-Models: `User` → `Vendor` (1:1) → `ComplianceSubmission` / `PerformanceReview`. `ComplianceItem` is a fixed seeded list of 6. `PerformanceReview.overallScore` = average of the three 1–5 scores, computed on submit.
+Models: `User` → `Vendor` (1:1) → `ComplianceSubmission` / `PerformanceReview`. `ComplianceItem` is a fixed seeded list of 10. `PerformanceReview.overallScore` = average of the three 1–5 scores, computed on submit.
 
 ## Migration Rules
 - Schema changes go through `prisma migrate dev` — never `db push` against a real DB without confirmation.
@@ -33,7 +33,7 @@ Models: `User` → `Vendor` (1:1) → `ComplianceSubmission` / `PerformanceRevie
 ## Module Map
 - `lib/db.ts` — Prisma singleton (`db`).
 - `lib/auth.ts` — full Auth.js config (Node runtime, bcrypt). `lib/auth.config.ts` — edge-safe config for `proxy.ts` (Next 16 renamed `middleware` → `proxy`).
-- `lib/upload.ts` — `uploadFile(file)` helper, the ONLY filesystem touchpoint (swap for S3 later).
+- `lib/upload.ts` — `uploadFile(file)` helper, uploads to Cloudinary (only upload touchpoint).
 - `lib/validations.ts` — zod schemas. `lib/compliance-items.ts` — fixed seed list.
 - `lib/status.tsx` — `StatusBadge` mapping + expiry helpers.
 - Route groups: `app/(auth)`, `app/(vendor)`, `app/(admin)`. Each `(vendor)`/`(admin)` group has its own sidebar layout.
