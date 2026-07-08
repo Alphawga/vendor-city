@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PerformanceChart } from "./performance-chart";
+import { PerformanceChart } from "@/components/charts/performance-chart";
 
 export default async function VendorPerformancePage() {
   const session = await auth();
