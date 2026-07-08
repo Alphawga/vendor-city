@@ -1,8 +1,9 @@
 import { randomUUID } from "crypto";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
+import { Readable } from "stream";
+import { v2 as cloudinary, type UploadApiResponse } from "cloudinary";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
+cloudinary.config({ secure: true });
+
 const MAX_BYTES = 10 * 1024 * 1024;
 const ALLOWED = new Set([
   "application/pdf",
@@ -12,19 +13,32 @@ const ALLOWED = new Set([
 ]);
 
 /**
- * Single filesystem touchpoint for document storage. Swap this body for
- * S3/Supabase later without changing any caller.
+ * Single upload touchpoint for document storage (Cloudinary).
  */
 export async function uploadFile(file: File): Promise<string> {
   if (file.size === 0) throw new Error("Empty file.");
   if (file.size > MAX_BYTES) throw new Error("File exceeds 10MB limit.");
   if (!ALLOWED.has(file.type)) throw new Error("Only PDF, PNG, or JPEG files are allowed.");
 
-  await mkdir(UPLOAD_DIR, { recursive: true });
-  const ext = path.extname(file.name) || ".bin";
-  const filename = `${randomUUID()}${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(UPLOAD_DIR, filename), buffer);
 
-  return `/uploads/${filename}`;
+  const result = await new Promise<UploadApiResponse>((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "vendor-city/compliance",
+        public_id: randomUUID(),
+        resource_type: "auto",
+      },
+      (error, uploaded) => {
+        if (error || !uploaded) {
+          reject(error instanceof Error ? error : new Error("Cloudinary upload failed."));
+          return;
+        }
+        resolve(uploaded);
+      },
+    );
+    Readable.from(buffer).pipe(stream);
+  });
+
+  return result.secure_url;
 }
