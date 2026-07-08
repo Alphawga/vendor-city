@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  VENDOR
+  ADMIN
+}
+
+enum OnboardingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum SubmissionStatus {
+  NOT_SUBMITTED
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+  vendor    Vendor?
+}
+
+model Vendor {
+  id                 String                 @id @default(cuid())
+  userId             String                 @unique
+  user               User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName        String
+  contactName        String
+  phone              String
+  address            String?
+  onboardingStatus   OnboardingStatus       @default(PENDING)
+  rejectionReason    String?
+  createdAt          DateTime               @default(now())
+  submissions        ComplianceSubmission[]
+  performanceReviews PerformanceReview[]
+}
+
+model ComplianceItem {
+  id          String                 @id @default(cuid())
+  name        String                 @unique
+  description String?
+  submissions ComplianceSubmission[]
+}
+
+model ComplianceSubmission {
+  id               String           @id @default(cuid())
+  vendorId         String
+  vendor           Vendor           @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  complianceItemId String
+  complianceItem   ComplianceItem   @relation(fields: [complianceItemId], references: [id])
+  fileUrl          String?
+  status           SubmissionStatus @default(NOT_SUBMITTED)
+  rejectionReason  String?
+  expiryDate       DateTime?
+  submittedAt      DateTime?
+  reviewedAt       DateTime?
+
+  @@unique([vendorId, complianceItemId])
+}
+
+model PerformanceReview {
+  id                 String   @id @default(cuid())
+  vendorId           String
+  vendor             Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  periodLabel        String
+  qualityScore       Int
+  timelinessScore    Int
+  communicationScore Int
+  overallScore       Float
+  comments           String?
+  reviewedBy         String
+  createdAt          DateTime @default(now())
+}
